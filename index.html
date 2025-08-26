@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KalkuLaper - Kalkulator Laper Pujian</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fefce8; /* yellow-50 */
+        }
+        .brutalist-card {
+            background-color: white;
+            border: 3px solid #000;
+            border-radius: 0.75rem;
+            box-shadow: 6px 6px 0px #000;
+            transition: all 0.2s ease-in-out;
+        }
+        .brutalist-btn {
+            border: 3px solid #000;
+            border-radius: 0.5rem;
+            box-shadow: 4px 4px 0px #000;
+            transition: all 0.2s ease-in-out;
+            font-weight: 700;
+        }
+        .brutalist-btn:hover {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0px #000;
+        }
+        .brutalist-btn:active {
+            transform: translate(4px, 4px);
+            box-shadow: 0px 0px 0px #000;
+        }
+        .brutalist-input {
+            border: 3px solid #000;
+            border-radius: 0.5rem;
+            transition: all 0.2s ease-in-out;
+        }
+        .brutalist-input:focus {
+            box-shadow: 0 0 0 3px #facc15; /* yellow-400 */
+            outline: none;
+        }
+        .target-card.selected {
+            border-color: #3b82f6; /* blue-500 */
+            background-color: #dbeafe; /* blue-100 */
+            box-shadow: 6px 6px 0px #3b82f6;
+        }
+        .bmi-gauge { position: relative; width: 100%; height: 20px; background-color: #e5e7eb; border-radius: 5px; border: 3px solid #000; }
+        .bmi-gauge-bar { position: absolute; top: 0; height: 100%; }
+        .bmi-indicator { position: absolute; top: -8px; width: 16px; height: 34px; background-color: #000; border-radius: 2px; transform: translateX(-50%); transition: left 0.5s ease-in-out; border: 3px solid white; }
+        .bmi-labels { display: flex; justify-content: space-between; font-size: 0.875rem; font-weight: 600; color: #000; margin-top: 0.5rem; }
+        .prose h4 {
+            font-size: 1.25rem;
+            font-weight: 800;
+            margin-top: 1.5rem;
+            margin-bottom: 0.5rem;
+            border-bottom: 3px solid #000;
+            padding-bottom: 0.25rem;
+        }
+        .prose ul > li::before { background-color: #000; }
+        .loader {
+            width: 20px; height: 20px; border: 3px solid #000; border-top: 3px solid #facc15;
+            border-radius: 50%; animation: spin 1s linear infinite; display: inline-block; margin-right: 8px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="text-gray-900 flex items-center justify-center min-h-screen p-4">
+
+    <main class="w-full max-w-4xl mx-auto">
+        <div class="brutalist-card p-6 md:p-8">
+            <h1 class="text-4xl md:text-5xl font-extrabold text-center mb-2">KalkuLaper</h1>
+            <p class="text-center text-lg font-semibold text-gray-700 mb-8">Kalkulator Kesehatan untuk kamu yang Laper Pujian!</p>
+
+            <!-- Input Form -->
+            <form id="calculator-form" onsubmit="return false;">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                    <h3 class="md:col-span-2 font-bold text-xl border-b-2 border-black pb-2">Data Diri (Jujur ya, jangan ngarang!)</h3>
+                    <div class="md:col-span-2">
+                        <label for="fullName" class="block text-md font-semibold text-gray-800 mb-1">Nama Lengkap</label>
+                        <input type="text" id="fullName" class="w-full px-4 py-2 brutalist-input" placeholder="Biar bisa disindir secara personal">
+                    </div>
+                    <div>
+                        <label for="age" class="block text-md font-semibold text-gray-800 mb-1">Umur</label>
+                        <input type="number" id="age" class="w-full px-4 py-2 brutalist-input" placeholder="Bukan umur perasaan">
+                    </div>
+                    <div>
+                        <label class="block text-md font-semibold text-gray-800 mb-1">Jenis Kelamin</label>
+                        <div class="flex gap-4">
+                            <label class="flex items-center p-3 border-2 border-black rounded-lg cursor-pointer has-[:checked]:bg-blue-200 flex-1">
+                                <input type="radio" name="gender" value="male" class="h-4 w-4 text-black border-black focus:ring-black">
+                                <span class="ml-3 font-semibold">Pria</span>
+                            </label>
+                             <label class="flex items-center p-3 border-2 border-black rounded-lg cursor-pointer has-[:checked]:bg-pink-200 flex-1">
+                                <input type="radio" name="gender" value="female" class="h-4 w-4 text-black border-black focus:ring-black">
+                                <span class="ml-3 font-semibold">Wanita</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div>
+                        <label for="height" class="block text-md font-semibold text-gray-800 mb-1">Tinggi (cm)</label>
+                        <input type="number" id="height" class="w-full px-4 py-2 brutalist-input" placeholder="170">
+                    </div>
+                    <div>
+                        <label for="weight" class="block text-md font-semibold text-gray-800 mb-1">Berat (kg)</label>
+                        <input type="number" id="weight" class="w-full px-4 py-2 brutalist-input" placeholder="Jangan dikurangin!">
+                    </div>
+                    
+                    <h3 class="md:col-span-2 font-bold text-xl border-b-2 border-black pb-2 mt-4">Pengukuran Tubuh (Kalau Berani)</h3>
+                    <div>
+                        <label for="neck" class="block text-md font-semibold text-gray-800 mb-1">Lingkar Leher (cm)</label>
+                        <input type="number" id="neck" class="w-full px-4 py-2 brutalist-input" placeholder="Bukan leher botol">
+                    </div>
+                     <div>
+                        <label for="waist" class="block text-md font-semibold text-gray-800 mb-1">Lingkar Pinggang (cm)</label>
+                        <input type="number" id="waist" class="w-full px-4 py-2 brutalist-input" placeholder="Tempat ban serep">
+                    </div>
+                    <div id="hip-input-container" class="hidden">
+                        <label for="hip" class="block text-md font-semibold text-gray-800 mb-1">Lingkar Pinggul (cm)</label>
+                        <input type="number" id="hip" class="w-full px-4 py-2 brutalist-input" placeholder="Ukur di bagian terlebar">
+                    </div>
+
+                    <h3 class="md:col-span-2 font-bold text-xl border-b-2 border-black pb-2 mt-4">Preferensi & Kebiasaan</h3>
+                    <div class="md:col-span-2">
+                        <label for="activity" class="block text-md font-semibold text-gray-800 mb-1">Aktivitas Harian</label>
+                        <select id="activity" class="w-full px-4 py-2 brutalist-input bg-white">
+                            <option value="1.2">Sangat Jarang (Tim Rebahan Sejati)</option>
+                            <option value="1.375">Pekerja Kantoran (Duduk > Bergerak)</option>
+                            <option value="1.55">Aktivitas Ringan (Ada gerak dikit lah)</option>
+                            <option value="1.725">Aktivitas Sedang (Rajin Keringetan)</option>
+                            <option value="1.9">Aktivitas Berat (Atlet / Kuli Bangunan)</option>
+                        </select>
+                    </div>
+                     <div class="md:col-span-2">
+                        <label for="allergies" class="block text-md font-semibold text-gray-800 mb-1">Alergi atau Pantangan (Opsional)</label>
+                        <input type="text" id="allergies" class="w-full px-4 py-2 brutalist-input" placeholder="Contoh: seafood, kacang, mantan...">
+                    </div>
+                </div>
+
+                <div class="mt-8 text-center">
+                    <button id="calculate-btn" class="w-full md:w-auto bg-yellow-400 text-black py-3 px-12 brutalist-btn">
+                        Cek Nasib Badan
+                    </button>
+                </div>
+                <div id="error-message" class="mt-4 text-center text-red-600 font-bold hidden"></div>
+            </form>
+        </div>
+
+        <!-- Hasil Kalkulasi -->
+        <div id="results-container" class="mt-8 hidden">
+            <div id="daily-tip-card" class="brutalist-card p-6 mb-8 bg-blue-200 hidden">
+                 <h3 class="font-bold text-black mb-2 text-lg">💡 Tamparan Sehat Hari Ini</h3>
+                 <p id="daily-tip-text" class="text-gray-800 font-semibold">Memuat tips...</p>
+            </div>
+
+            <div class="text-center mb-6">
+                <h2 class="text-3xl font-extrabold text-gray-900">Oke, <span id="result-name" class="text-indigo-600"></span>, katanya laper pujian?</h2>
+                <p class="text-gray-700 font-semibold">Coba kita lihat dulu rapor badanmu. Siap-siap ya.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="brutalist-card p-6 result-card md:col-span-2">
+                    <h3 class="font-bold text-gray-800 mb-2 text-lg">Indeks Massa Tubuh (IMT)</h3>
+                    <div class="flex items-center gap-4">
+                        <p id="bmi-value" class="text-6xl font-extrabold text-indigo-600">0.0</p>
+                        <div>
+                            <p id="bmi-category" class="text-xl font-bold">Kategori</p>
+                            <p id="bmi-interpretation" class="text-md font-semibold text-gray-600"></p>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <div class="bmi-gauge">
+                            <div class="bmi-gauge-bar bg-blue-400" style="left: 0%; width: 18.5%;"></div>
+                            <div class="bmi-gauge-bar bg-green-400" style="left: 18.5%; width: 6.5%;"></div>
+                            <div class="bmi-gauge-bar bg-yellow-400" style="left: 25%; width: 5%;"></div>
+                            <div class="bmi-gauge-bar bg-red-400" style="left: 30%; width: 70%;"></div>
+                            <div id="bmi-indicator" class="bmi-indicator" style="left: 0%;"></div>
+                        </div>
+                        <div class="bmi-labels"><span>18.5</span><span>25</span><span>30</span></div>
+                    </div>
+                </div>
+                <div class="brutalist-card p-6 result-card">
+                    <h3 class="font-bold text-gray-800 mb-2 text-lg">Berat Badan Ideal</h3>
+                    <p class="text-5xl font-extrabold text-cyan-600"><span id="ideal-weight-range">0-0</span> kg</p>
+                    <p class="text-md font-semibold text-gray-600 mt-1">Harusnya segini, bukan yang sekarang.</p>
+                </div>
+                <div id="bfp-result-card" class="brutalist-card p-6 result-card hidden md:col-span-3">
+                    <h3 class="font-bold text-gray-800 mb-2 text-lg">Estimasi Lemak Tubuh</h3>
+                    <div class="flex items-center gap-4">
+                        <p id="bfp-value" class="text-6xl font-extrabold text-teal-600">0.0%</p>
+                        <div>
+                            <p id="bfp-category" class="text-xl font-bold">Kategori</p>
+                            <p id="bfp-interpretation" class="text-md font-semibold text-gray-600"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pilihan Target Kalori -->
+            <div class="brutalist-card p-6 mt-8 result-card">
+                <h2 class="text-2xl font-extrabold text-gray-900 mb-4 text-center">Langkah 1: Mau Ngapain? Pilih Target!</h2>
+                <div id="target-selection" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Target Cards here -->
+                </div>
+                <h2 class="text-2xl font-extrabold text-gray-900 mb-4 mt-8 text-center">Langkah 2: Cek Kulkas & Minta Disindir</h2>
+                 <div class="max-w-xl mx-auto">
+                    <label for="ingredients" class="block text-md font-semibold text-gray-800 mb-1">Isi Kulkas (Opsional)</label>
+                    <input type="text" id="ingredients" class="w-full px-4 py-2 brutalist-input" placeholder="Contoh: telur, dada ayam, sisa semalem...">
+                    <p class="text-sm text-gray-600 mt-1">Tulis apa aja yang ada, biar AI gak ngasih menu aneh-aneh.</p>
+                </div>
+                <div class="mt-6 text-center">
+                    <button id="analyze-btn" class="w-full md:w-auto bg-yellow-400 text-black py-3 px-12 brutalist-btn flex items-center justify-center mx-auto disabled:bg-gray-400">
+                        <span id="analyze-btn-text">Aku Siap Disindir</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Hasil Analisa & Menu -->
+            <div id="analysis-result" class="brutalist-card p-6 mt-8 hidden">
+                <h2 id="analysis-title" class="text-3xl font-extrabold text-gray-900 mb-4"></h2>
+                <div id="analysis-content" class="prose max-w-none prose-indigo">
+                    <!-- AI generated content will be injected here -->
+                </div>
+            </div>
+             <div class="mt-8 text-center text-sm text-gray-600 font-semibold">
+                <p><strong>Disclaimer:</strong> Ini saran dari AI yang nyinyir, tapi tetap berdasarkan data. Kalau baper, tanya ahli gizi beneran.</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const calculateBtn = document.getElementById('calculate-btn');
+            const analyzeBtn = document.getElementById('analyze-btn');
+            const fullNameEl = document.getElementById('fullName'), ageEl = document.getElementById('age'), heightEl = document.getElementById('height'), weightEl = document.getElementById('weight');
+            const neckEl = document.getElementById('neck'), waistEl = document.getElementById('waist'), hipEl = document.getElementById('hip');
+            const genderRadios = document.querySelectorAll('input[name="gender"]');
+            const activityEl = document.getElementById('activity');
+            const allergiesEl = document.getElementById('allergies');
+            const hipInputContainer = document.getElementById('hip-input-container');
+            const errorMessageEl = document.getElementById('error-message');
+            const resultsContainer = document.getElementById('results-container');
+            const allResultCards = document.querySelectorAll('.result-card');
+            const targetSelectionContainer = document.getElementById('target-selection');
+            const analysisResultContainer = document.getElementById('analysis-result');
+            const ingredientsEl = document.getElementById('ingredients');
+            const dailyTipCard = document.getElementById('daily-tip-card');
+            const dailyTipText = document.getElementById('daily-tip-text');
+
+            const resultNameEl = document.getElementById('result-name');
+            const bmiValueEl = document.getElementById('bmi-value'), bmiCategoryEl = document.getElementById('bmi-category'), bmiInterpretationEl = document.getElementById('bmi-interpretation'), bmiIndicatorEl = document.getElementById('bmi-indicator');
+            const idealWeightRangeEl = document.getElementById('ideal-weight-range');
+            const bfpResultCard = document.getElementById('bfp-result-card'), bfpValueEl = document.getElementById('bfp-value'), bfpCategoryEl = document.getElementById('bfp-category'), bfpInterpretationEl = document.getElementById('bfp-interpretation');
+
+            genderRadios.forEach(radio => radio.addEventListener('change', e => {
+                hipInputContainer.classList.toggle('hidden', e.target.value !== 'female');
+            }));
+
+            calculateBtn.addEventListener('click', handleCalculation);
+            analyzeBtn.addEventListener('click', handleAnalysis);
+            
+            targetSelectionContainer.addEventListener('click', (e) => {
+                const selectedCard = e.target.closest('.target-card');
+                if (!selectedCard) return;
+
+                targetSelectionContainer.querySelectorAll('.target-card').forEach(card => {
+                    card.classList.remove('selected');
+                });
+                
+                selectedCard.classList.add('selected');
+            });
+
+            async function handleCalculation() {
+                hideError();
+                resultsContainer.classList.add('hidden');
+                analysisResultContainer.classList.add('hidden');
+                allResultCards.forEach(card => card.classList.remove('show'));
+
+                const fullName = fullNameEl.value;
+                const age = parseInt(ageEl.value), height = parseInt(heightEl.value), weight = parseInt(weightEl.value);
+                const gender = document.querySelector('input[name="gender"]:checked')?.value;
+                const activityFactor = parseFloat(activityEl.value);
+
+                if (!fullName || isNaN(age) || isNaN(height) || isNaN(weight) || !gender || age <= 0 || height <= 0 || weight <= 0) {
+                    showError('Harap isi semua data diri dengan benar.');
+                    return;
+                }
+
+                const bmi = calculateBMI(weight, height);
+                const bmr = calculateBMR(age, height, weight, gender);
+                const tdee = calculateTDEE(bmr, activityFactor);
+                const idealWeight = calculateIdealWeight(height, gender);
+
+                const neck = parseInt(neckEl.value), waist = parseInt(waistEl.value), hip = parseInt(hipEl.value);
+                let bfp = null;
+                const hasBodyMeasurements = !isNaN(neck) && !isNaN(waist) && neck > 0 && waist > 0;
+                const hasFemaleMeasurements = hasBodyMeasurements && !isNaN(hip) && hip > 0;
+
+                if (gender === 'male' && hasBodyMeasurements) bfp = calculateBFP(gender, height, neck, waist);
+                else if (gender === 'female' && hasFemaleMeasurements) bfp = calculateBFP(gender, height, neck, waist, hip);
+                
+                displayResults(fullName, bmi, tdee, idealWeight, bfp);
+                generateDailyTip();
+            }
+            
+            async function handleAnalysis() {
+                const selectedTargetCard = document.querySelector('.target-card.selected');
+                if (!selectedTargetCard) {
+                    alert('Pilih salah satu target kalori terlebih dahulu.');
+                    return;
+                }
+                const targetType = selectedTargetCard.dataset.target;
+                const targetCaloriesText = document.getElementById(`${targetType}-calories`).textContent;
+                const targetCalories = parseInt(targetCaloriesText.replace(/,/g, ''));
+                const ingredients = ingredientsEl.value;
+                const allergies = allergiesEl.value;
+
+                setLoading(true);
+                analysisResultContainer.classList.add('hidden');
+
+                try {
+                    const responseText = await generateMenuWithAI(targetType, targetCalories, ingredients, allergies);
+                    generateAnalysis(targetType, responseText);
+                } catch (error) {
+                    console.error("AI Generation Error:", error);
+                    document.getElementById('analysis-content').innerHTML = `<p class="text-red-500">Maaf, AI-nya lagi ngambek. Coba lagi nanti.</p>`;
+                } finally {
+                    setLoading(false);
+                    analysisResultContainer.classList.remove('hidden');
+                    analysisResultContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+
+            // --- AI Integration ---
+            async function generateDailyTip() {
+                dailyTipCard.classList.remove('hidden');
+                try {
+                    const prompt = "Berikan satu tips sehat harian yang singkat, cerdas, dan sedikit menyindir dalam Bahasa Indonesia. Contoh: 'Minum air putih itu gratis, kenapa masih milih yang manis-manis?'";
+                    const payload = { contents: [{ parts: [{ text: prompt }] }] };
+                    const response = await fetch('/api/proxy', { 
+                        method: 'POST', 
+                        headers: { 'Content-Type': 'application/json' }, 
+                        body: JSON.stringify(payload) 
+                    });
+                    if (!response.ok) throw new Error('Gagal dapat wangsit.');
+                    const result = await response.json();
+                    dailyTipText.textContent = result.candidates[0].content.parts[0].text;
+                } catch (error) {
+                    console.error("Daily Tip Error:", error);
+                    dailyTipText.textContent = "Katanya mau sehat, tapi koneksi internet aja bermasalah. Coba lagi nanti.";
+                }
+            }
+            
+            async function generateMenuWithAI(target, calories, ingredients, allergies) {
+                const targetText = {
+                    loss: 'menurunkan berat badan',
+                    maintain: 'menjaga berat badan',
+                    gain: 'menaikkan berat badan'
+                }[target];
+
+                let prompt = `Anda adalah "KalkuLaper AI", asisten diet personal yang super jujur. Persona Anda itu nyinyir sekaligus nyindir. Anda tahu pengguna ini 'laper pujian' dan ingin hasil instan, jadi tugas Anda adalah memberikan saran kesehatan yang benar tapi dengan gaya bahasa yang menampar realita dan menyindir keinginan mereka untuk dipuji. Gunakan bahasa gaul Jakarta yang tajam tapi lucu.
+                
+                Buatlah rekomendasi diet dan gaya hidup untuk seseorang dengan target kalori harian sekitar ${calories} kkal untuk tujuan ${targetText}.
+                
+                Struktur jawaban Anda harus dalam format HTML sebagai berikut:
+                1. Gunakan tag <p> untuk paragraf pembuka yang nyinyir dan menyindir (2-3 kalimat).
+                2. Gunakan <h4>Gerak Badan (Biar Gak Cuma Jempol yang Olahraga)</h4> diikuti dengan <ul> berisi 2-3 poin rekomendasi aktivitas fisik.
+                3. Gunakan <h4>Daftar Musuh Bebuyutan (Jauhi Mereka!)</h4> diikuti dengan <ul> berisi 2-3 poin makanan atau kebiasaan yang harus dihindari/dibatasi.
+                4. Gunakan <h4>Wejangan Ekstra (Kalau Masih Didengerin)</h4> diikuti dengan <ul> berisi 2-3 poin tips tambahan.
+                5. Gunakan <h4>Menu Realistis (Bukan Foto Instagram)</h4> diikuti dengan <ul> berisi menu untuk Sarapan, Makan Siang, Makan Malam, dan Camilan.
+                `;
+                if (ingredients) {
+                    prompt += `Orang ini punya bahan-bahan berikut di kulkasnya, coba manfaatkan: ${ingredients}. `;
+                }
+                if (allergies) {
+                    prompt += `PENTING: Orang ini punya pantangan/alergi terhadap ${allergies}, jadi jangan sampai ada bahan itu di menu. `;
+                }
+                prompt += `Pastikan semua respons dalam format HTML yang valid. Jangan gunakan markdown.`;
+                
+                const payload = {
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: { temperature: 0.8, topP: 0.95 }
+                };
+
+                const response = await fetch('/api/proxy', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) throw new Error(`API request failed with status ${response.status}`);
+                const result = await response.json();
+                if (result.candidates?.[0]?.content?.parts?.[0]?.text) {
+                    return result.candidates[0].content.parts[0].text;
+                } else {
+                    throw new Error("Invalid response structure from API");
+                }
+            }
+            
+            // --- Calculation Functions ---
+            const calculateBMI = (w, h) => w / ((h / 100) ** 2);
+            const calculateBMR = (a, h, w, g) => g === 'male' ? (10*w)+(6.25*h)-(5*a)+5 : (10*w)+(6.25*h)-(5*a)-161;
+            const calculateTDEE = (bmr, af) => bmr * af;
+            const calculateBFP = (g, h, n, wa, hi = 0) => g === 'male' 
+                ? 495 / (1.0324 - 0.19077 * Math.log10(wa - n) + 0.15456 * Math.log10(h)) - 450
+                : 495 / (1.29579 - 0.35004 * Math.log10(wa + hi - n) + 0.22100 * Math.log10(h)) - 450;
+            const calculateIdealWeight = (h, g) => {
+                const base = g === 'male' ? 50 : 45.5;
+                const ideal = base + 2.3 * ((h / 2.54) - 60);
+                return { min: ideal * 0.9, max: ideal * 1.1 };
+            };
+            const calculateMacronutrients = (calories) => {
+                return { carbs: (calories * 0.40) / 4, protein: (calories * 0.30) / 4, fat: (calories * 0.30) / 9 };
+            };
+
+            // --- Display Functions ---
+            function displayResults(name, bmi, tdee, idealWeight, bfp) {
+                resultNameEl.textContent = name;
+                
+                const bmiCat = getBMICategory(bmi);
+                bmiValueEl.textContent = bmi.toFixed(1);
+                bmiCategoryEl.textContent = bmiCat.category;
+                bmiInterpretationEl.textContent = bmiCat.interpretation;
+                bmiCategoryEl.style.color = bmiCat.color;
+                updateBMIGauge(bmi);
+                
+                idealWeightRangeEl.textContent = `${idealWeight.min.toFixed(1)} - ${idealWeight.max.toFixed(1)}`;
+
+                if (bfp) {
+                    const bfpCat = getBfpCategory(bfp, document.querySelector('input[name="gender"]:checked')?.value);
+                    bfpValueEl.textContent = `${bfp.toFixed(1)}%`;
+                    bfpCategoryEl.textContent = bfpCat.category;
+                    bfpInterpretationEl.textContent = bfpCat.interpretation;
+                    bfpCategoryEl.style.color = bfpCat.color;
+                    bfpResultCard.classList.remove('hidden');
+                } else {
+                    bfpResultCard.classList.add('hidden');
+                }
+
+                const targets = { loss: tdee - 500, maintain: tdee, gain: tdee + 300 };
+                const targetData = [
+                    { type: 'loss', title: 'Turun BB', color: 'red-600' },
+                    { type: 'maintain', title: 'Jaga BB', color: 'blue-600' },
+                    { type: 'gain', title: 'Naik BB', color: 'green-600' }
+                ];
+
+                targetSelectionContainer.innerHTML = '';
+                targetData.forEach((item, index) => {
+                    const calories = targets[item.type];
+                    const macros = calculateMacronutrients(calories);
+                    const cardHTML = `
+                        <div class="target-card brutalist-card ${index === 1 ? 'selected' : ''}" data-target="${item.type}">
+                            <h3 class="font-extrabold text-${item.color}">${item.title}</h3>
+                            <p class="text-3xl font-extrabold my-1"><span id="${item.type}-calories">${Math.round(calories).toLocaleString('id-ID')}</span> kkal</p>
+                            <div class="text-sm font-semibold space-y-1 mt-2 border-t-2 border-black pt-2">
+                                <p><strong>Karbo:</strong> ${Math.round(macros.carbs)} g</p>
+                                <p><strong>Protein:</strong> ${Math.round(macros.protein)} g</p>
+                                <p><strong>Lemak:</strong> ${Math.round(macros.fat)} g</p>
+                            </div>
+                        </div>
+                    `;
+                    targetSelectionContainer.innerHTML += cardHTML;
+                });
+
+                resultsContainer.classList.remove('hidden');
+                let delay = 0;
+                allResultCards.forEach(card => {
+                    setTimeout(() => card.classList.add('show'), delay);
+                    delay += 100;
+                });
+            }
+            
+            function generateAnalysis(target, responseText) {
+                const titleText = {
+                    loss: "Rencana Aksi (Bukan Wacana)",
+                    maintain: "Cara Biar Gak Balik Lagi",
+                    gain: "Misi Penggemukan Sehat"
+                }[target];
+                
+                document.getElementById('analysis-title').textContent = titleText;
+                document.getElementById('analysis-content').innerHTML = responseText;
+            }
+
+            // --- Helper Functions ---
+            const updateBMIGauge = (bmi) => {
+                const minBmi = 15, maxBmi = 35;
+                let p = ((bmi - minBmi) / (maxBmi - minBmi)) * 100;
+                bmiIndicatorEl.style.left = `${Math.max(0, Math.min(100, p))}%`;
+            };
+            const getBMICategory = (bmi) => {
+                if (bmi < 18.5) return { category: 'Berat Badan Kurang', interpretation: 'Disarankan untuk menaikkan berat badan.', color: '#60a5fa' };
+                if (bmi < 25) return { category: 'Berat Badan Normal', interpretation: 'Selamat! Berat badan Anda ideal.', color: '#4ade80' };
+                if (bmi < 30) return { category: 'Kelebihan Berat Badan', interpretation: 'Disarankan untuk menurunkannya.', color: '#facc15' };
+                return { category: 'Obesitas', interpretation: 'Sangat disarankan untuk menurunkan berat badan.', color: '#fb923c' };
+            };
+            const getBfpCategory = (bfp, gender) => {
+                const ranges = gender === 'male' ? { e: 5, a: 13, f: 17, v: 24 } : { e: 13, a: 20, f: 24, v: 31 };
+                if (bfp < ranges.e) return { category: 'Esensial', interpretation: 'Tingkat lemak sangat rendah, bisa berisiko.', color: '#60a5fa' };
+                if (bfp <= ranges.a) return { category: 'Atlet', interpretation: 'Komposisi tubuh sangat baik dan bugar.', color: '#4ade80' };
+                if (bfp <= ranges.f) return { category: 'Bugar', interpretation: 'Tingkat lemak yang sehat dan ideal.', color: '#2dd4bf' };
+                if (bfp <= ranges.v) return { category: 'Rata-rata', interpretation: 'Tingkat lemak masih dalam batas wajar.', color: '#facc15' };
+                return { category: 'Obesitas', interpretation: 'Tingkat lemak berlebih, tingkatkan kewaspadaan.', color: '#fb923c' };
+            };
+            const setLoading = (isLoading) => {
+                const btn = analyzeBtn;
+                const btnText = document.getElementById('analyze-btn-text');
+                if (isLoading) {
+                    btn.disabled = true;
+                    btnText.innerHTML = `<span class="loader"></span> AI Lagi Mikir Keras...`;
+                } else {
+                    btn.disabled = false;
+                    btnText.innerHTML = 'Aku Siap Disindir';
+                }
+            };
+            const showError = (msg) => { errorMessageEl.textContent = msg; errorMessageEl.classList.remove('hidden'); };
+            const hideError = () => errorMessageEl.classList.add('hidden');
+        });
+    </script>
+</body>
+</html>
